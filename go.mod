@@ -1,4 +1,4 @@
-module github.com/billowdev/goease
+module github.com/rapidstellar/goease
 
 go 1.22.2
 
