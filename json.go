@@ -361,3 +361,63 @@ func UnmarshalJSON(data interface{}, target interface{}) error {
 	// Unmarshal the JSON data into the target interface{}
 	return json.Unmarshal(jsonData, target)
 }
+
+type JSOBA []map[string]interface{}
+
+// Value converts the JSOBA value into a driver.Value for database storage.
+//
+// This method converts the JSOBA value into a string representation before returning it as a driver.Value. It's typically used for storing JSONB data in databases that support JSONB storage.
+//
+// Returns:
+//   - driver.Value: A driver.Value representing the JSOBA value for database storage.
+//   - error: An error if there's any issue during the conversion process.
+//
+// Note:
+//   - This method internally uses the encoding/json package to marshal the JSOBA value into a string.
+//   - Any errors during the conversion process will be returned as an error.
+func (j JSOBA) Value() (driver.Value, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("--------------JSOBA Value-----------------")
+			err := fmt.Errorf("panic occurred: %v", r)
+			log.Println(err)
+			log.Println("-------------------------------")
+		}
+	}()
+	valueString, err := json.Marshal(j)
+	return string(valueString), err
+}
+
+// Scan populates the JSOBA value from a database driver.Value.
+//
+// This method takes a database driver.Value and populates the JSOBA value with the corresponding data. It's typically used when retrieving JSONB data from databases that support JSONB storage.
+//
+// Parameters:
+//   - value: interface{} - The database driver.Value to be scanned into the JSOBA value.
+//
+// Returns:
+//   - error: An error if there's any issue during the scanning process.
+//
+// Note:
+//   - This method expects the database driver.Value to be a byte slice representing JSON data.
+//   - Any errors during the scanning process will be returned as an error.
+func (j *JSOBA) Scan(value interface{}) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("--------------JSOBA Scan-----------------")
+			err := fmt.Errorf("panic occurred: %v", r)
+			log.Println(err)
+			log.Println("-------------------------------")
+		}
+	}()
+
+	if data, ok := value.([]byte); ok {
+		if err := json.Unmarshal(data, j); err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("unexpected type for JSOBA: %T", value)
+	}
+
+	return nil
+}
