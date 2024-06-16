@@ -321,6 +321,44 @@ func MarshalJSONB(data JSONB) ([]byte, error) {
 	return json.Marshal(data)
 }
 
+// MarshalJSONBA marshals the provided JSONBA slice into JSON format.
+//
+// This function takes a JSONBA slice, which is essentially a slice of map[string]interface{}, and marshals it into JSON format using the encoding/json package.
+//
+// Parameters:
+//   - data: JSONBA - The JSONBA slice to be marshaled.
+//
+// Returns:
+//   - []byte: The JSON representation of the provided JSONBA slice.
+//   - error: An error if the marshaling process fails.
+func MarshalJSONBA(data JSONBA) ([]byte, error) {
+	return json.Marshal(data)
+}
+
+// NewJSONBA creates a new JSONBA instance from the provided data.
+//
+// This function marshals the input 'data' into JSON format and then unmarshals it into a slice of map[string]interface{}. It returns the created JSONBA instance and any error encountered during the process.
+//
+// Parameters:
+//   - data: interface{} - The data to be converted into JSONBA. It can be any data type.
+//
+// Returns:
+//   - JSONBA: The created JSONBA instance, which is essentially a slice of map[string]interface{}.
+//   - error: An error if the marshaling or unmarshaling process fails.
+func NewJSONBA(data interface{}) (JSONBA, error) {
+	dataJSON, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
+	var dataMap []map[string]interface{}
+	if err := json.Unmarshal(dataJSON, &dataMap); err != nil {
+		return nil, err
+	}
+
+	return JSONBA(dataMap), nil
+}
+
 // UnmarshalJSON unmarshals JSON data into the target interface{}.
 //
 // This function takes JSON data as input and unmarshals it into the provided target interface{}. If the input data is already a []byte, it directly unmarshals it; otherwise, it marshals the data into []byte first. It returns any error encountered during the unmarshaling process.
@@ -362,7 +400,7 @@ func UnmarshalJSON(data interface{}, target interface{}) error {
 	return json.Unmarshal(jsonData, target)
 }
 
-type JSOBA []map[string]interface{}
+type JSONBA []map[string]interface{}
 
 // Value converts the JSOBA value into a driver.Value for database storage.
 //
@@ -375,7 +413,7 @@ type JSOBA []map[string]interface{}
 // Note:
 //   - This method internally uses the encoding/json package to marshal the JSOBA value into a string.
 //   - Any errors during the conversion process will be returned as an error.
-func (j JSOBA) Value() (driver.Value, error) {
+func (j JSONBA) Value() (driver.Value, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("--------------JSOBA Value-----------------")
@@ -401,10 +439,10 @@ func (j JSOBA) Value() (driver.Value, error) {
 // Note:
 //   - This method expects the database driver.Value to be a byte slice representing JSON data.
 //   - Any errors during the scanning process will be returned as an error.
-func (j *JSOBA) Scan(value interface{}) error {
+func (j *JSONBA) Scan(value interface{}) error {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("--------------JSOBA Scan-----------------")
+			log.Println("--------------JSONBA Scan-----------------")
 			err := fmt.Errorf("panic occurred: %v", r)
 			log.Println(err)
 			log.Println("-------------------------------")
@@ -416,7 +454,7 @@ func (j *JSOBA) Scan(value interface{}) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("unexpected type for JSOBA: %T", value)
+		return fmt.Errorf("unexpected type for JSONBA: %T", value)
 	}
 
 	return nil
