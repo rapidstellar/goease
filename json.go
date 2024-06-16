@@ -243,20 +243,20 @@ func StructToMap(data interface{}) (map[string]interface{}, error) {
 // Example:
 // Assuming you have JSON data in a byte slice named 'jsonData' and a struct named 'User', you can use ReadJSONB as follows:
 //
-//   var user User
-//   err := ReadJSONB(jsonData, &user)
-//   if err != nil {
-//       fmt.Println("Error:", err)
-//       return
-//   }
+//	var user User
+//	err := ReadJSONB(jsonData, &user)
+//	if err != nil {
+//	    fmt.Println("Error:", err)
+//	    return
+//	}
 //
 // This will unmarshal the JSON data in 'jsonData' into the 'user' struct.
 func ReadJSONB(jsonData []byte, target interface{}) error {
-    err := json.Unmarshal(jsonData, target)
-    if err != nil {
-        return err
-    }
-    return nil
+	err := json.Unmarshal(jsonData, target)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // NewJSONB creates a new JSONB instance from the provided data.
@@ -273,24 +273,91 @@ func ReadJSONB(jsonData []byte, target interface{}) error {
 // Example:
 // Suppose you have some data in a struct named 'Person'. You can create a JSONB instance from this data as follows:
 //
-//   person := Person{Name: "John", Age: 30}
-//   jsonb, err := NewJSONB(person)
-//   if err != nil {
-//       fmt.Println("Error:", err)
-//       return
-//   }
+//	person := Person{Name: "John", Age: 30}
+//	jsonb, err := NewJSONB(person)
+//	if err != nil {
+//	    fmt.Println("Error:", err)
+//	    return
+//	}
 //
 // This will convert the 'person' struct into a JSONB instance.
 func NewJSONB(data interface{}) (JSONB, error) {
-    dataJSON, err := json.Marshal(data)
-    if err != nil {
-        return nil, err
-    }
+	dataJSON, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
 
-    var dataMap map[string]interface{}
-    if err := json.Unmarshal(dataJSON, &dataMap); err != nil {
-        return nil, err
-    }
+	var dataMap map[string]interface{}
+	if err := json.Unmarshal(dataJSON, &dataMap); err != nil {
+		return nil, err
+	}
 
-    return JSONB(dataMap), nil
+	return JSONB(dataMap), nil
+}
+
+// MarshalJSONB marshals a JSONB instance into JSON format.
+//
+// This function takes a JSONB instance as input and marshals it into JSON format. It returns the JSON representation of the input data and any error encountered during the marshaling process.
+//
+// Parameters:
+//   - data: JSONB - The JSONB instance to marshal into JSON format.
+//
+// Returns:
+//   - []byte: The JSON representation of the input JSONB instance.
+//   - error: An error if the marshaling process fails.
+//
+// Example:
+// Suppose you have a JSONB instance named 'jsonData' representing some data. You can marshal it into JSON format like this:
+//
+//	jsonData := JSONB{"name": "John", "age": 30}
+//	jsonBytes, err := MarshalJSONB(jsonData)
+//	if err != nil {
+//	    fmt.Println("Error:", err)
+//	    return
+//	}
+//
+// This will marshal the 'jsonData' into a byte slice containing the JSON representation.
+func MarshalJSONB(data JSONB) ([]byte, error) {
+	return json.Marshal(data)
+}
+
+// UnmarshalJSON unmarshals JSON data into the target interface{}.
+//
+// This function takes JSON data as input and unmarshals it into the provided target interface{}. If the input data is already a []byte, it directly unmarshals it; otherwise, it marshals the data into []byte first. It returns any error encountered during the unmarshaling process.
+//
+// Parameters:
+//   - data: interface{} - The JSON data to unmarshal. It can be either a []byte or any other data type that can be marshaled into []byte.
+//   - target: interface{} - A pointer to the type into which the JSON data will be unmarshaled.
+//
+// Returns:
+//   - error: An error if the unmarshaling process fails.
+//
+// Example:
+// Suppose you have JSON data in a byte slice named 'jsonData' and a struct named 'User', you can use UnmarshalJSON like this:
+//
+//	var user User
+//	err := UnmarshalJSON(jsonData, &user)
+//	if err != nil {
+//	    fmt.Println("Error:", err)
+//	    return
+//	}
+//
+// This will unmarshal the JSON data in 'jsonData' into the 'user' struct.
+func UnmarshalJSON(data interface{}, target interface{}) error {
+	var jsonData []byte
+	var err error
+
+	// Check if data is already a []byte
+	if bytesData, ok := data.([]byte); ok {
+		jsonData = bytesData
+	} else {
+		// If data is not a []byte, marshal it to []byte
+		jsonData, err = json.Marshal(data)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Unmarshal the JSON data into the target interface{}
+	return json.Unmarshal(jsonData, target)
 }
