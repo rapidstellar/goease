@@ -228,3 +228,69 @@ func StructToMap(data interface{}) (map[string]interface{}, error) {
 
 	return result, nil
 }
+
+// ReadJSONB reads JSON data into the target interface.
+//
+// This function unmarshals the JSON data contained in the 'jsonData' byte slice into the provided 'target' interface{}. The 'target' must be a pointer to the type into which the JSON data will be unmarshaled. If the unmarshaling process encounters an error, it returns that error. Otherwise, it returns nil.
+//
+// Parameters:
+//   - jsonData: []byte - The JSON data to be unmarshaled.
+//   - target: interface{} - A pointer to the type into which the JSON data will be unmarshaled.
+//
+// Returns:
+//   - error: An error if the unmarshaling process fails. Otherwise, returns nil.
+//
+// Example:
+// Assuming you have JSON data in a byte slice named 'jsonData' and a struct named 'User', you can use ReadJSONB as follows:
+//
+//   var user User
+//   err := ReadJSONB(jsonData, &user)
+//   if err != nil {
+//       fmt.Println("Error:", err)
+//       return
+//   }
+//
+// This will unmarshal the JSON data in 'jsonData' into the 'user' struct.
+func ReadJSONB(jsonData []byte, target interface{}) error {
+    err := json.Unmarshal(jsonData, target)
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+// NewJSONB creates a new JSONB instance from the provided data.
+//
+// This function marshals the input 'data' into JSON format and then unmarshals it into a map[string]interface{}. It returns the created JSONB instance and any error encountered during the process.
+//
+// Parameters:
+//   - data: interface{} - The data to be converted into JSONB. It can be any data type.
+//
+// Returns:
+//   - JSONB: The created JSONB instance, which is essentially a map[string]interface{}.
+//   - error: An error if the marshaling or unmarshaling process fails.
+//
+// Example:
+// Suppose you have some data in a struct named 'Person'. You can create a JSONB instance from this data as follows:
+//
+//   person := Person{Name: "John", Age: 30}
+//   jsonb, err := NewJSONB(person)
+//   if err != nil {
+//       fmt.Println("Error:", err)
+//       return
+//   }
+//
+// This will convert the 'person' struct into a JSONB instance.
+func NewJSONB(data interface{}) (JSONB, error) {
+    dataJSON, err := json.Marshal(data)
+    if err != nil {
+        return nil, err
+    }
+
+    var dataMap map[string]interface{}
+    if err := json.Unmarshal(dataJSON, &dataMap); err != nil {
+        return nil, err
+    }
+
+    return JSONB(dataMap), nil
+}
